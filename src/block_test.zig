@@ -202,6 +202,9 @@ fn runTestInner(
         return .{ .fail = msg };
     };
 
+    // Set EVMC revision based on network fork
+    chain.evmc_revision = networkToEvmcRevision(fixture.network);
+
     // Step 6: Execute blocks
     for (fixture.blocks, 0..) |encoded_block, bi| {
         // Decode block from hex RLP
@@ -331,4 +334,13 @@ fn runTestInner(
     }
 
     return .pass;
+}
+
+fn networkToEvmcRevision(network: []const u8) u8 {
+    if (std.mem.eql(u8, network, "Paris")) return 10;
+    if (std.mem.eql(u8, network, "Shanghai") or std.mem.eql(u8, network, "ParisToShanghaiAtTime15k")) return 11;
+    if (std.mem.eql(u8, network, "Cancun") or std.mem.eql(u8, network, "ShanghaiToCancunAtTime15k")) return 12;
+    if (std.mem.eql(u8, network, "Prague") or std.mem.eql(u8, network, "CancunToPragueAtTime15k")) return 13;
+    if (std.mem.eql(u8, network, "Osaka") or std.mem.eql(u8, network, "PragueToOsakaAtTime15k")) return 14;
+    return 11; // default to Shanghai
 }
