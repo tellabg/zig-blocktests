@@ -4,10 +4,16 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
+    const phant_dep = b.dependency("phant", .{ .target = target, .optimize = optimize });
+    const phant_mod = phant_dep.module("phant");
+
     const exe_root_module = b.createModule(.{
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
+        .imports = &.{
+            .{ .name = "phant", .module = phant_mod },
+        },
     });
 
     const exe = b.addExecutable(.{
