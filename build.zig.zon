@@ -4,7 +4,8 @@
     .fingerprint = 0x892bde3ef6d7282d,
     .dependencies = .{
         .phant = .{
-            .path = "../phant",
+            .url = "https://github.com/tellabg/phant/archive/00d0fe00c495fd4fb5cb2804a6cf9499eb9046fa.tar.gz",
+            .hash = "phant-0.0.1-beta-0-NsKIw9MKhQCaC__NWMhHrcCdyBVGrLUxMzlszWUG102U",
         },
     },
     .paths = .{""},
