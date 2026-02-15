@@ -99,22 +99,39 @@ fn processTestFile(allocator: std.mem.Allocator, dir: std.fs.Dir, filename: []co
         
         const test_obj = json_obj.get(test_name).?.object;
         
-        // Basic validation - check required fields
-        if (test_obj.get("blocks")) |_| {
-            if (test_obj.get("pre")) |_| {
-                if (test_obj.get("expect")) |_| {
-                    std.debug.print("PASS (basic structure valid)\n", .{});
-                    result.passed += 1;
-                } else {
-                    std.debug.print("FAIL (missing expect field)\n", .{});
-                    result.failed += 1;
+        // Check for different test formats
+        var has_required_fields = true;
+        var missing_field: []const u8 = "";
+        
+        if (test_obj.get("blocks") == null) {
+            has_required_fields = false;
+            missing_field = "blocks";
+        } else if (test_obj.get("pre") == null) {
+            has_required_fields = false;
+            missing_field = "pre";
+        } else if (test_obj.get("expect") == null and test_obj.get("postState") == null) {
+            has_required_fields = false;
+            missing_field = "expect/postState";
+        }
+        
+        if (has_required_fields) {
+            // Basic validation: count blocks
+            const blocks = test_obj.get("blocks").?.array;
+            std.debug.print("PASS (structure valid, {d} blocks)", .{blocks.items.len});
+            
+            // Additional info if available
+            if (test_obj.get("_info")) |info| {
+                if (info.object.get("comment")) |comment| {
+                    const comment_str = comment.string;
+                    if (comment_str.len > 0) {
+                        std.debug.print(" - {s}", .{comment_str});
+                    }
                 }
-            } else {
-                std.debug.print("FAIL (missing pre field)\n", .{});
-                result.failed += 1;
             }
+            std.debug.print("\n", .{});
+            result.passed += 1;
         } else {
-            std.debug.print("FAIL (missing blocks field)\n", .{});
+            std.debug.print("FAIL (missing {s} field)\n", .{missing_field});
             result.failed += 1;
         }
     }
